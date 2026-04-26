@@ -2,7 +2,7 @@
 
 An interactive, browser-based performance monitoring dashboard for private water utility operators in Rwanda.
 
-🌐 **Live Demo:** [View on GitHub Pages](https://inno100sami.github.io/Python-NRW-Assessment-Monitoring-Dashboard/NRW_Dashboard_v3.html)
+🌐 **Live Demo:** [View on GitHub Pages](https://inno100sami.github.io/Private-Operator-Benchmarking-Framework/dashboard.html)
 
 ---
 
