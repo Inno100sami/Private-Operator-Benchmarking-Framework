@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Private Operator Benchmarking Framework</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f4f8; color: #111827; }
+
+  /* NAV */
+  nav { background: #1e3a8a; padding: 14px 32px; display: flex; align-items: center; justify-content: space-between; }
+  nav .logo { color: #fff; font-size: 16px; font-weight: 700; letter-spacing: 0.3px; }
+  nav .logo span { opacity: 0.65; font-weight: 400; margin-left: 6px; font-size: 13px; }
+  nav a { color: rgba(255,255,255,0.8); font-size: 13px; text-decoration: none; padding: 6px 12px; border-radius: 6px; transition: 0.15s; }
+  nav a:hover { background: rgba(255,255,255,0.12); color: #fff; }
+
+  /* HERO */
+  .hero { background: linear-gradient(135deg, #1e3a8a 0%, #1a56db 60%, #0694a2 100%); padding: 72px 32px 80px; text-align: center; color: #fff; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; inset: 0; background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"); }
+  .hero-inner { max-width: 760px; margin: 0 auto; position: relative; }
+  .hero-badge { display: inline-block; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); border-radius: 20px; padding: 6px 16px; font-size: 12px; font-weight: 600; letter-spacing: 0.5px; margin-bottom: 20px; }
+  .hero h1 { font-size: 40px; font-weight: 800; line-height: 1.2; margin-bottom: 16px; }
+  .hero p { font-size: 17px; opacity: 0.85; line-height: 1.6; max-width: 580px; margin: 0 auto 32px; }
+  .hero-btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+  .btn-primary { background: #fff; color: #1e3a8a; border: none; border-radius: 8px; padding: 14px 28px; font-size: 15px; font-weight: 700; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: 0.15s; box-shadow: 0 4px 14px rgba(0,0,0,0.15); }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.2); }
+  .btn-outline { background: transparent; color: #fff; border: 2px solid rgba(255,255,255,0.5); border-radius: 8px; padding: 13px 26px; font-size: 15px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: 0.15s; }
+  .btn-outline:hover { border-color: #fff; background: rgba(255,255,255,0.1); }
+
+  /* STATS STRIP */
+  .stats-strip { background: #fff; border-bottom: 1px solid #e5e7eb; }
+  .stats-inner { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); }
+  .stat { padding: 24px 28px; text-align: center; border-right: 1px solid #e5e7eb; }
+  .stat:last-child { border-right: none; }
+  .stat-val { font-size: 32px; font-weight: 800; color: #1a56db; }
+  .stat-lbl { font-size: 12px; color: #6b7280; margin-top: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* FEATURES */
+  .section { max-width: 1100px; margin: 0 auto; padding: 60px 24px; }
+  .section-label { font-size: 12px; font-weight: 700; color: #1a56db; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+  .section-title { font-size: 28px; font-weight: 800; color: #111827; margin-bottom: 14px; }
+  .section-sub { font-size: 16px; color: #6b7280; max-width: 580px; line-height: 1.6; margin-bottom: 40px; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+  .card { background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.07); border: 1px solid #e5e7eb; transition: 0.15s; }
+  .card:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.1); transform: translateY(-2px); }
+  .card-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; margin-bottom: 14px; }
+  .card-icon.blue { background: #e8f0fe; }
+  .card-icon.green { background: #def7ec; }
+  .card-icon.orange { background: #feecdc; }
+  .card-icon.purple { background: #edebfe; }
+  .card-icon.teal { background: #d5f5f6; }
+  .card-icon.red { background: #fde8e8; }
+  .card h3 { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+  .card p { font-size: 13px; color: #6b7280; line-height: 1.6; }
+
+  /* METRICS TABLE */
+  .metrics-section { background: #fff; border-top: 1px solid #e5e7eb; border-bottom: 1px solid #e5e7eb; padding: 60px 24px; }
+  .metrics-inner { max-width: 1100px; margin: 0 auto; }
+  .mtable { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0; border: 1px solid #e5e7eb; border-radius: 10px; overflow: hidden; }
+  .mcol { border-right: 1px solid #e5e7eb; }
+  .mcol:last-child { border-right: none; }
+  .mcol-header { padding: 12px 16px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #e5e7eb; }
+  .mcol-header.blue { background: #eff6ff; color: #1a56db; }
+  .mcol-header.green { background: #f0fdf4; color: #057a55; }
+  .mcol-header.orange { background: #fff7ed; color: #c2410c; }
+  .mcol-header.purple { background: #f5f3ff; color: #6c2bd9; }
+  .mitem { padding: 10px 16px; font-size: 13px; color: #374151; border-bottom: 1px solid #f3f4f6; display: flex; align-items: center; gap: 8px; }
+  .mitem:last-child { border-bottom: none; }
+  .mitem::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #d1d5db; flex-shrink: 0; }
+
+  /* OPERATORS */
+  .ops-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 28px; }
+  .op-chip { background: #fff; border: 1px solid #e5e7eb; border-radius: 20px; padding: 7px 14px; font-size: 13px; color: #374151; font-weight: 500; }
+
+  /* CTA */
+  .cta { background: linear-gradient(135deg, #1e3a8a, #1a56db); padding: 60px 24px; text-align: center; color: #fff; }
+  .cta h2 { font-size: 28px; font-weight: 800; margin-bottom: 12px; }
+  .cta p { font-size: 15px; opacity: 0.85; margin-bottom: 28px; }
+
+  /* FOOTER */
+  footer { background: #111827; color: #9ca3af; text-align: center; padding: 24px; font-size: 12px; }
+  footer strong { color: #e5e7eb; }
+
+  @media (max-width: 640px) {
+    .hero h1 { font-size: 28px; }
+    .stats-inner { grid-template-columns: 1fr 1fr; }
+    .stat { border-bottom: 1px solid #e5e7eb; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">PO Benchmarking <span>Rwanda Water Sector</span></div>
+  <a href="dashboard.html">Open Dashboard &rarr;</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-badge">Water Sector &middot; FY2024&ndash;2026</div>
+    <h1>Private Operator<br>Benchmarking Framework</h1>
+    <p>A performance monitoring system for private water utility operators &mdash; tracking commercial, financial, operational, and service-level KPIs across Rwanda&rsquo;s water sector.</p>
+    <div class="hero-btns">
+      <a href="dashboard.html" class="btn-primary">&#128202; Open Dashboard</a>
+      <a href="README.md" class="btn-outline">&#128196; Documentation</a>
+    </div>
+  </div>
+</div>
+
+<!-- STATS STRIP -->
+<div class="stats-strip">
+  <div class="stats-inner">
+    <div class="stat"><div class="stat-val">19</div><div class="stat-lbl">Private Operators</div></div>
+    <div class="stat"><div class="stat-val">217</div><div class="stat-lbl">Data Records</div></div>
+    <div class="stat"><div class="stat-val">40+</div><div class="stat-lbl">KPI Metrics</div></div>
+    <div class="stat"><div class="stat-val">3 yrs</div><div class="stat-lbl">Coverage (2024&ndash;2026)</div></div>
+  </div>
+</div>
+
+<!-- DASHBOARD FEATURES -->
+<div class="section">
+  <div class="section-label">Dashboard Features</div>
+  <div class="section-title">Everything in one interactive view</div>
+  <div class="section-sub">Filter by year, month, or individual operator. All charts update instantly.</div>
+  <div class="cards">
+    <div class="card">
+      <div class="card-icon blue">&#128200;</div>
+      <h3>Commercial Performance</h3>
+      <p>Revenue, billing efficiency, metering level, service complaints, disconnection rates, and accounts receivable &mdash; all benchmarked across operators.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon green">&#128176;</div>
+      <h3>Financial Analysis</h3>
+      <p>Operating ratio, production costs, energy expenditure, and labour costs as a share of OPEX. Instantly see which operators are financially sustainable.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon orange">&#9881;&#65039;</div>
+      <h3>Operational Efficiency</h3>
+      <p>Non-revenue water (NRW), pump functionality, continuity of supply, and network leakage frequency &mdash; the core operational health indicators.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon purple">&#127754;</div>
+      <h3>Service Level</h3>
+      <p>Water coverage, average hours of supply per day, tariff levels, and complaint response times &mdash; measuring service delivery to end users.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon teal">&#128201;</div>
+      <h3>Trend Analysis</h3>
+      <p>Select any operator and track their revenue, billing efficiency, NRW, and operating ratio over time on interactive line charts.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon red">&#128193;</div>
+      <h3>Data Table</h3>
+      <p>A full filterable data table with the latest performance summary per operator &mdash; including colour-coded status badges (Good / Moderate / Needs Attention).</p>
+    </div>
+  </div>
+</div>
+
+<!-- METRICS -->
+<div class="metrics-section">
+  <div class="metrics-inner">
+    <div class="section-label">Metrics Tracked</div>
+    <div class="section-title">40+ KPIs across 4 categories</div>
+    <div class="mtable">
+      <div class="mcol">
+        <div class="mcol-header blue">Commercial</div>
+        <div class="mitem">Revenue &ndash; Water Sales</div>
+        <div class="mitem">Billing Efficiency</div>
+        <div class="mitem">Metering Level</div>
+        <div class="mitem">Active Connections</div>
+        <div class="mitem">Meter Replacement Rate</div>
+        <div class="mitem">Service Complaints / Connection</div>
+        <div class="mitem">Customer Disconnection Rate</div>
+        <div class="mitem">Accounts Receivable / Arrears</div>
+        <div class="mitem">Connection Density</div>
+      </div>
+      <div class="mcol">
+        <div class="mcol-header green">Finance &amp; HR</div>
+        <div class="mitem">Operating Ratio</div>
+        <div class="mitem">Production Costs (O&amp;M)</div>
+        <div class="mitem">Energy Costs</div>
+        <div class="mitem">Labour Costs % of OPEX</div>
+        <div class="mitem">Average Capital Expenditure</div>
+        <div class="mitem">% of Trained Staff</div>
+        <div class="mitem">Staff Productivity Index</div>
+        <div class="mitem">% Staff with Degrees</div>
+        <div class="mitem">Technical Staff Efficiency</div>
+      </div>
+      <div class="mcol">
+        <div class="mcol-header orange">Operational</div>
+        <div class="mitem">Non-Revenue Water (NRW %)</div>
+        <div class="mitem">Pump Functionality</div>
+        <div class="mitem">Pump Failures</div>
+        <div class="mitem">Continuity of Supply</div>
+        <div class="mitem">Leakages per km</div>
+        <div class="mitem">Avg Duration of Leakage</div>
+        <div class="mitem">Energy Consumption</div>
+        <div class="mitem">Water Mains Rehabilitation</div>
+        <div class="mitem">NRW per Connection</div>
+      </div>
+      <div class="mcol">
+        <div class="mcol-header purple">Service Level</div>
+        <div class="mitem">Water Coverage</div>
+        <div class="mitem">Average Hours of Supply</div>
+        <div class="mitem">Average Tariff (RWF/m&sup3;)</div>
+        <div class="mitem">Complaint Response Time</div>
+        <div class="mitem">Complaints Resolution Rate</div>
+        <div class="mitem">Water Consumption / HH</div>
+        <div class="mitem">Pro-Poor Service Coverage</div>
+        <div class="mitem">Water Quality Testing</div>
+        <div class="mitem">% Vulnerable People Served</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- OPERATORS -->
+<div class="section">
+  <div class="section-label">Coverage</div>
+  <div class="section-title">19 Private Operators Benchmarked</div>
+  <div class="ops-grid">
+    <span class="op-chip">AQUACREAK</span>
+    <span class="op-chip">AQUARWANDA</span>
+    <span class="op-chip">AQUAVIRUNGA</span>
+    <span class="op-chip">Aqua Management</span>
+    <span class="op-chip">Axion Water Solution</span>
+    <span class="op-chip">BLUE WATER SOLUTION</span>
+    <span class="op-chip">COWBE R</span>
+    <span class="op-chip">IMPUMBERO</span>
+    <span class="op-chip">Integrated Designer</span>
+    <span class="op-chip">J&amp;S</span>
+    <span class="op-chip">KIBEHO PILIGRAM CENTER</span>
+    <span class="op-chip">OWEN LORD COMANY</span>
+    <span class="op-chip">REDEC N</span>
+    <span class="op-chip">RULINDO WATER TREATMENT</span>
+    <span class="op-chip">RUVUNE</span>
+    <span class="op-chip">SANITATION &amp; ENGINEERING</span>
+    <span class="op-chip">Trigero</span>
+    <span class="op-chip">WATER MAINTENANCE</span>
+    <span class="op-chip">WaterWays</span>
+  </div>
+</div>
+
+<!-- CTA -->
+<div class="cta">
+  <h2>Ready to explore the data?</h2>
+  <p>Open the interactive dashboard to filter, compare, and analyse operator performance.</p>
+  <a href="dashboard.html" class="btn-primary" style="font-size:16px;padding:15px 32px;">&#128202; Open Dashboard</a>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <strong>Private Operator Benchmarking Framework</strong> &middot; V6 &middot; April 2026 &middot; Rwanda Water Sector<br>
+  <span style="margin-top:4px;display:block;">Publish on GitHub Pages: Settings &rarr; Pages &rarr; main branch / root</span>
+</footer>
+
+</body>
+</html>
