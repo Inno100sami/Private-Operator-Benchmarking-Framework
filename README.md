@@ -2,8 +2,6 @@
 
 An interactive, browser-based performance monitoring dashboard for private water utility operators in Rwanda.
 
-**Live dashboard → open `index.html` in your browser, or publish via GitHub Pages.**
-
 ---
 
 ## Overview
